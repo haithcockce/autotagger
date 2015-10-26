@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 POST ATTRIBUTES
 ===========================
 COL     ATTRIBUTE NAME
@@ -29,10 +28,6 @@ COL     ATTRIBUTE NAME
 POST TYPES
 ===========================
 VAL TYPE
-=======
-POST TYPES
-===========================
->>>>>>> 7ebeb4c172837e6d5966cfac139e2eee6b8c6169
 1	Question
 2	Answer
 3	Wiki

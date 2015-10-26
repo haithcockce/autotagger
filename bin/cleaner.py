@@ -22,6 +22,7 @@ for row in csv_reader:
 code_only_records.append(copy.deepcopy(records[0]))
 plain_text_records.append(copy.deepcopy(records[0]))
 
+tag_str = ''
 for i in range(1, len(records)):
     stripped = ''
     plain_text_records.append(copy.deepcopy(records[i]))
@@ -37,11 +38,14 @@ for i in range(1, len(records)):
     # Strip away all punctuation and random escape sequences   
     for dom_element in body.find_all(True):
         stripped += dom_element.get_text().strip().translate(transtable) + ' '
-        stripped.replace('\n', ' ')
-        stripped.replace('\\n', ' ')
-        stripped.replace('\t', ' ')
-        stripped.replace('\r', ' ')
+        stripped = stripped.replace('\n', ' ').replace('\\n', ' ').replace('\t', ' ').replace('\r', ' ')
     plain_text_records[i][8] = stripped
+
+    # Grab the tags
+#    if len(records[i][16]) != 0:
+#        tag_strings = records[i][16].replace('<', '').replace('>', ' ').strip().split(' ')
+#        for tag in tag_strings:
+#            if tag not in 
 
 # Flatten code blocks in code only
 #stripped = ''

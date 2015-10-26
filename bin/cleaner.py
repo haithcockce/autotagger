@@ -4,14 +4,12 @@ import bs4 as BeautifulSoup
 import string
 import copy
 
-#DATA_DIRECTORY = '/home/dev/School/CSc-522/Project/autotagger/data/original'
+# DONT JUDGE ME I DONT KNOW HOW TO PYTHON AND I GOOGLED ALMOST ALL THIS
 
 #SETUP 
 records = []
 code_only_records = []
 plain_text_records = []
-text_and_html_records = []
-no_html_records = []
 tags= []
 transtable = {ord(c): None for c in string.punctuation}
 PROJECT_PATH = '/home/dev/School/CSc-522/Project/autotagger/'
@@ -30,7 +28,7 @@ for i in range(1, len(records)):
     body = BeautifulSoup.BeautifulSoup(plain_text_records[i][8], 'html.parser')
     if len(body.find_all('code')) != 0:
         # Gather all the records that have code blocks and unwrap the contents
-        code_only_records.append(copy.deepcopy(records[i]))
+        #code_only_records.append(copy.deepcopy(records[i]))
 
         # Remove all code blocks 
         while len(body.find_all('code')) != 0:
@@ -46,13 +44,13 @@ for i in range(1, len(records)):
     plain_text_records[i][8] = stripped
 
 # Flatten code blocks in code only
-stripped = ''
-for i in len(code_only_records):
-    body = BeautifulSoup.BeautifulSoup(code_only_records[i][8], 'html.parser')
-    code_contents = body.code.contents
-    for i in range(0,len(code_contents)):
-       stripped += code_contents[i] + ' '
-    code_only_records[i][8] = stripped
+#stripped = ''
+#for i in range(1, len(code_only_records)):
+#    body = BeautifulSoup.BeautifulSoup(code_only_records[i][8], 'html.parser')
+#    code_contents = body.code.contents
+#    for i in range(0,len(code_contents)):
+#       stripped += code_contents[i] + ' '
+#    code_only_records[i][8] = stripped
 
 # Flatten code blocks 
 

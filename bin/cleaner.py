@@ -11,7 +11,7 @@ records = []
 code_only_records = []
 plain_text_records = []
 tags= []
-transtable = {ord(c): None for c in string.punctuation}
+transtable = {ord(c): ' ' for c in string.punctuation}
 PROJECT_PATH = '/home/dev/School/CSc-522/Project/autotagger/'
 stripped = ''
 

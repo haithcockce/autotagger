@@ -45,7 +45,7 @@ for row in csv_reader:
 nbc = naive_bayse.NaiveBayseClassifier()
 nbc.Train(questions)
 def classify(question):
-  return nbc.Classify(question, True)
+  return nbc.Classify(question, False)
 # use this line if you don't want dependency on joblib
 #cls = [classify(question) for question in questions]
 cls = Parallel(n_jobs=8)(delayed(classify)(question) for question in questions)
@@ -60,8 +60,8 @@ for i in range(1, len(cls)):
   else:
     fp[c] = fp.setdefault(c, 0) + 1
   for t in q.tag_list:
-    if t != c:
-      fn[t] = tp.setdefault(c, 0) + 1
+    if not t == c:
+      fn[t] = fn.setdefault(t, 0) + 1
 
 for c in nbc.prob_tag.keys():
   print "{} tp: {}, fp: {}, fn: {}".format(c, tp.get(c,0), fp.get(c, 0), fn.get(c, 0))

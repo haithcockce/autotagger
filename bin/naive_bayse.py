@@ -34,11 +34,13 @@ class NaiveBayseClassifier:
     for tag, tag_count in self.tag_counts.iteritems():
       self.prob_tag[tag] = math.log(tag_count)-self.log_all_questions
       log_total_word_count = math.log(self.words_per_tag[tag]+alpha*len(self.allwords))
-      self.unknown_word_prob_tag[tag] = -log_total_word_count
+      self.unknown_word_prob_tag[tag] = math.log(alpha) - log_total_word_count
       prob_word_given_tag = self.prob_word_given_tag.setdefault(tag, {})
       word_counts_per_tag = self.word_counts_per_tags[tag]
       for word in self.allwords:
-        prob_word_given_tag[word] = math.log(word_counts_per_tag.get(word, 0)+alpha) - log_total_word_count
+        cnt = word_counts_per_tag.get(word, 0)
+        if cnt > 0:
+          prob_word_given_tag[word] = math.log(cnt+alpha) - log_total_word_count
         
         
 
@@ -52,8 +54,9 @@ class NaiveBayseClassifier:
       uknown_prob = self.unknown_word_prob_tag[tag]
       loglikelyhood = 0
       for word, count in question.word_counts.iteritems():
-        # log(x*y) = log(x) + log(y)
-        loglikelyhood += count*prob_word_given_tag.get(word, uknown_prob)
+        if word in self.allwords:
+          # log(x*y) = log(x) + log(y)
+          loglikelyhood += count*prob_word_given_tag.get(word, uknown_prob)
       if not mle:
         loglikelyhood += self.prob_tag[tag]
       if loglikelyhood > max_likelyhood:

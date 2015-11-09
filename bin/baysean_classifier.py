@@ -15,7 +15,7 @@ kBodyFieldNumber = 8
 kQuestion = '1'
 
 # if set, filters only these tags. Else, uses all tags
-tags_to_consider = ['c++', 'java']
+tags_to_consider = ['c++', 'java', 'python', 'c#', 'html', 'javascript']
 questions=[]
 
 csv_reader = csv.reader(open(PROJECT_PATH + 'data/plain-text/full.csv', 'r'))

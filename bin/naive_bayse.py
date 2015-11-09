@@ -21,10 +21,10 @@ class NaiveBayseClassifier:
       for word, count in question.word_counts.iteritems():
         self.allwords.add(word)
         for tag in question.tag_list:
-          self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+1
+          self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
           
         for w in word_counts:
-          w[word] = w.get(word, 0) + 1
+          w[word] = w.get(word, 0) + count
         
     # Convert to log probabilities
     self.prob_word_given_tag = {}

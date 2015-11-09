@@ -47,7 +47,7 @@ nbc.Train(questions)
 def classify(question):
   return nbc.Classify(question, False)
 # use this line if you don't want dependency on joblib
-#cls = [classify(question) for question in questions]
+# cls = [classify(question) for question in questions]
 cls = Parallel(n_jobs=8)(delayed(classify)(question) for question in questions)
 tp = {}
 fp = {}

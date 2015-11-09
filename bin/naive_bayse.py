@@ -27,31 +27,22 @@ class NaiveBayseClassifier:
           w[word] = w.get(word, 0) + count
         
     # Convert to log probabilities
-    self.prob_word_given_tag = {}
-    self.prob_tag = {}
-    self.unknown_word_prob_tag = {}
     self.log_all_questions = math.log(self.all_questions)
-    for tag, tag_count in self.tag_counts.iteritems():
-      self.prob_tag[tag] = math.log(tag_count)-self.log_all_questions
-      log_total_word_count = math.log(self.words_per_tag[tag]+alpha*len(self.allwords))
-      self.unknown_word_prob_tag[tag] = math.log(alpha) - log_total_word_count
-      prob_word_given_tag = self.prob_word_given_tag.setdefault(tag, {})
-      word_counts_per_tag = self.word_counts_per_tags[tag]
-      for word in self.allwords:
-        cnt = word_counts_per_tag.get(word, 0)
-        if cnt > 0:
-          prob_word_given_tag[word] = math.log(cnt+alpha) - log_total_word_count
-        
-        
+    log_alpha = math.log(alpha)
+    self.uknown_uknown = log_alpha - math.log(alpha*len(self.allwords))
+    log_total_word_counts = dict([(tag, math.log(word_count+alpha*len(self.allwords))) for tag, word_count in self.words_per_tag.iteritems()])
+
+    self.unknown_word_prob_tag = dict([(tag, log_alpha - ltwc) for tag, ltwc in log_total_word_counts.iteritems()])
+    self.prob_tag = dict([(tag, math.log(tag_count)-self.log_all_questions) for tag, tag_count in self.tag_counts.iteritems()])
+    self.prob_word_given_tag = dict([(tag, dict([(word, math.log(cnt+alpha) - log_total_word_counts[tag]) for word, cnt in word_counts.iteritems()])) for tag, word_counts in self.word_counts_per_tags.iteritems()])
 
   def Classify(self, question, mle=True):
     max_tag = None
     max_likelyhood = None
     log_all_questions = math.log(self.all_questions)
     
-    
     for tag, prob_word_given_tag in self.prob_word_given_tag.iteritems():
-      uknown_prob = self.unknown_word_prob_tag[tag]
+      uknown_prob = self.unknown_word_prob_tag.get(tag, self.uknown_uknown)
       loglikelyhood = 0
       for word, count in question.word_counts.iteritems():
         if word in self.allwords:

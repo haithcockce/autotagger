@@ -30,3 +30,22 @@ For n iterations of analysis:
 '''
 
 ITERATIONS = 10000
+
+test_data = [] 
+# test_data[0] == java
+# test_data[1] == android
+# test_data[2] == c
+# test_data[3] == python
+# test_data[4] == .net
+
+test_classes = ['java', 'android', 'c', 'python', '.net']
+for class_label in test_classes:
+
+    ith_document = copy.deepcopy(documentdb.unique_one_grams)
+  
+    index = documentdb.unique_tags.index(class_label) + 1 # offset to make up for headers in records
+    one_grams = documentdb.records[index][1].split()
+    for one_gram in one_grams:
+        ith_document[one_gram] += 1 
+    
+    document_db.append(list(ith_document.values()))

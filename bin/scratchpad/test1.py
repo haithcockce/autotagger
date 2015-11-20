@@ -1,5 +1,3 @@
-my_dict = {"herpa": 1}
+import sys
 
-def building():
-    print("WHY HELLO THAR")
-
+print(sys.argv[1])

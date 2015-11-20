@@ -19,15 +19,14 @@ BODY_INDEX = 1
 TRANSTABLE = {ord(c): ' ' for c in string.punctuation}
 
 unique_monograms = {}
-unqiue_tags = []
+unqiue_tags = {}
 records = []
 stopwords = sw.words('english')
 
-# Construct the records
-print(FILEPATH) 
 start_time = time.time()
 print(start_time)
 
+# Construct the records
 csv_reader = csv.reader(open(FILEPATH, 'r', newline=''))
 for row in csv_reader:
 
@@ -39,6 +38,9 @@ for row in csv_reader:
 
         records.append([row[16], row[8]])
 
+print('DEBUG: Constructed records')
+print(time.time() - start_time)
+
 for record in records:
     # Construct the dictionary of unique monograms
     # Useful to gather the count later. 
@@ -47,6 +49,13 @@ for record in records:
         if (word not in unique_monograms) and (word not in stopwords) and (len(word) > 0):
             unique_monograms[word] = 0;
 
+    # Construct the dictionary of unique keys
+    tag_list = 
+
+
+
+print('DEBUG: Created unique monograms')
+print(time.time() - start_time)
 
 # After constructing unique monograms,
 # start populating the document matrix
@@ -55,7 +64,7 @@ for record in records:
 monogram_counts = {}
 tags = []
 iterations = 0
-
+buff = []
 
 for record in records:
 
@@ -70,20 +79,34 @@ for record in records:
             monogram_counts[word] += 1
 
     # for code legibility 
-    monogram_counts = numpy.array(list(monogram_counts.values()))
+    #monogram_counts = numpy.array(list(monogram_counts.values()))
 
      
     # grab the classes (tags) of this record (document) and append
     # to the lists
     for tag in tag_list:
-        try:
-            temp_matrix = numpy.vstack((temp_matrix, monogram_counts))
-        except NameError:
-            temp_matrix = copy.deepcopy(monogram_counts)
+        buff.append(list(monogram_counts.values()))
+        #try:
+        #    temp_matrix = numpy.vstack((temp_matrix, monogram_counts))
+        #except NameError:
+        #    temp_matrix = copy.deepcopy(monogram_counts)
         tags.append(tag)    # This will be used as the classes
+    if (iterations % 250) == 0:
+        print('DEBUG: vstack-ed {:d} times'.format(iterations))
+        try:
+            temp_matrix = numpy.vstack((temp_matrix, numpy.array(buff)))
+        except NameError:
+            temp_matrix = copy.deepcopy(numpy.array(buff))
+        buff = []
+    iterations += 1
 
+
+print('DEBUG: Made entire matrix')
+print(time.time() - start_time)
 
 sparse_data = spsparse.csc_matrix(temp_matrix)
+
+print('DEBUG: Made sparse matrix')
 
 end_time = time.time()
 
@@ -107,3 +130,38 @@ print(end_time - start_time)
 #     - resulting matrices might be too large :c
 
 #U, s = spsplinalg.svds(sparse_data, k=len(unique_monograms), return_singular_vectors="u")
+
+
+
+# most_popular:
+#    param: tags
+#       - array of strings
+#    determine the most popular tag of the 
+#    list of tags provided. 
+def most_popular(tags):
+
+    for unique_tag in unique_tags:
+        if unique_tag == tags:
+            return unique_tag
+
+
+def build_clean_unique_tags(tags_dict):
+
+    # Normalize the counts
+    sigma = float(sum(list(tags_dict)))
+    normalized_tags_dict = copy.deepcopy(tags_dict)
+    for key in normalized_tags_dict:
+        normalized_tags_dict[key] = float(normalized_tags_dict[key]) / sigma
+
+        # Remove all tags that show up in 
+        # less than 1% of questions
+        if normalized_tags_dict[key] < 1.0:
+            normalized_tags_dict.pop(key, None)
+
+    sorted_tags = []
+    for i in range(0, len(normalized_tags_dict)):
+        tag = max(normalized_tags_dict, key=normalized_tags_dict.get)
+        sorted_tags.append(tag)
+        normalized_tags_dict.pop(key, None)
+
+    return sorted_tags

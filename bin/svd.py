@@ -8,6 +8,8 @@ import nltk
 from nltk.corpus import stopwords as sw
 import time
 import string
+import pdb
+import matplotlib.pyplot as plt
 
 if len(sys.argv) < 2:
     print("Usage: python svd.py <RAW DATA CSV>")
@@ -62,8 +64,9 @@ def build_clean_unique_tags(tags_dict):
     sorted_tags = []
     for i in range(0, len(normalized_tags_dict)):
         tag = max(normalized_tags_dict, key=normalized_tags_dict.get)
+        print(tag)
         sorted_tags.append(tag)
-        normalized_tags_dict.pop(key, None)
+        normalized_tags_dict.pop(tag, None)
 
     return sorted_tags
 
@@ -106,6 +109,8 @@ tag_count = {}
 for record in records:
     tag_list = record[TAGS_INDEX].lower().replace('<', '').replace('>', ' ').split(' ')
     for tag in tag_list:
+        if len(tag) == 0:
+            continue
         if tag not in tag_count:
             tag_count[tag] = 0
         else:
@@ -154,9 +159,9 @@ for record in records:
     if (iterations % 250) == 0:
         print('DEBUG: vstack-ed {:d} times'.format(iterations))
         try:
-            temp_matrix = numpy.vstack((temp_matrix, numpy.array(buff)))
+            temp_matrix = spsparse.vstack((temp_matrix, numpy.array(buff).astype('d')))
         except NameError:
-            temp_matrix = copy.deepcopy(numpy.array(buff))
+            temp_matrix = spsparse.coo_matrix((numpy.array(buff).astype('d')))
         buff = []
     iterations += 1
 
@@ -188,6 +193,7 @@ print(time.time() - start_time)
 #     - resulting matrices might be too large :c
 
 #U, s = spsplinalg.svds(sparse_data, k=len(unique_monograms), return_singular_vectors="u")
+_, s, _ = spsplinalg.svds(sparse_data, k=(len(unique_monograms) - 1), return_singular_vectors="u")
 
 
 

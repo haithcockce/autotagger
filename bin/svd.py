@@ -1,15 +1,14 @@
 #!/usr/bin/python
 
-import sys, csv, copy
+import sys, csv, copy, time, string, pdb
 import numpy
 import scipy.sparse as spsparse
 from scipy.sparse import linalg as spsplinalg
 import nltk
 from nltk.corpus import stopwords as sw
-import time
-import string
-import pdb
 import matplotlib.pyplot as plt
+import sklearn
+from sklearn.preprocessing import normalize
 
 if len(sys.argv) < 2:
     print("Usage: python svd.py <RAW DATA CSV>")
@@ -20,7 +19,7 @@ TAGS_INDEX = 0
 BODY_INDEX = 1
 TRANSTABLE = {ord(c): ' ' for c in string.punctuation}
 
-unique_monograms = {}
+dictionary = {}
 popular_tags = {}
 unqiue_tags = {}
 records = []
@@ -73,8 +72,6 @@ def build_clean_unique_tags(tags_dict):
 
 
 
-
-
 # Construct the records
 csv_reader = csv.reader(open(FILEPATH, 'r', newline=''))
 for row in csv_reader:
@@ -101,8 +98,8 @@ for record in records:
     # Useful to gather the count later. 
     word_list = record[BODY_INDEX].lower().translate(TRANSTABLE).split(' ')
     for word in word_list:
-        if (word not in unique_monograms) and (word not in stopwords) and (len(word) > 0):
-            unique_monograms[word] = 0;
+        if (word not in dictionary) and (word not in stopwords) and (len(word) > 0):
+            dictionary[word] = 0;
 
 # Construct the dictionary of unique keys
 tag_count = {}
@@ -142,7 +139,7 @@ for record in records:
     record[TAGS_INDEX] = tag
 
     # copy the monogram template to count the words for this document 
-    monogram_counts = copy.deepcopy(unique_monograms)
+    monogram_counts = copy.deepcopy(dictionary)
     monogram_list = record[BODY_INDEX].lower().translate(TRANSTABLE).split(' ')
 
     # begin counting the records. 
@@ -192,8 +189,20 @@ print(time.time() - start_time)
 # . actually perform SVD
 #     - resulting matrices might be too large :c
 
-#U, s = spsplinalg.svds(sparse_data, k=len(unique_monograms), return_singular_vectors="u")
-_, s, _ = spsplinalg.svds(sparse_data, k=(len(unique_monograms) - 1), return_singular_vectors="u")
+sparse_data_norm = spsparse.csc_matrix(normalize(sparse_data, axis=0))
+
+print('DEBUG: Normalized Matrix')
+print(time.time() - start_time)
+
+# Now to take the normalize the columns since the eigenvalues were so heavily skewed. 
+
+#U, s = spsplinalg.svds(sparse_data, k=len(dictionary), return_singular_vectors="u")
+#_, s, _ = spsplinalg.svds(sparse_data, k=(len(dictionary) - 1), return_singular_vectors="u")
+
+s = spsplinalg.svds(sparse_data_norm, k=10000, return_singular_vectors=False)
+
+print('DEBUG: Calculated Singular values')
+print(time.time() - start_time)
 
 
 

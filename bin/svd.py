@@ -199,7 +199,8 @@ print(time.time() - start_time)
 #U, s = spsplinalg.svds(sparse_data, k=len(dictionary), return_singular_vectors="u")
 #_, s, _ = spsplinalg.svds(sparse_data, k=(len(dictionary) - 1), return_singular_vectors="u")
 
-s = spsplinalg.svds(sparse_data_norm, k=10000, return_singular_vectors=False)
+#s = spsplinalg.svds(sparse_data_norm, k=10000, return_singular_vectors=False)
+s = spsplinalg.svds(sparse_data, k=10000, return_singular_vectors=False)
 
 print('DEBUG: Calculated Singular values')
 print(time.time() - start_time)

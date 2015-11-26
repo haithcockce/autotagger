@@ -1,10 +1,67 @@
 import sets
 
+def tag_suggester_cost(tp, tn, fp, fn, qs, tags, ntags):
+  tp_cost = -float(1)
+  tn_cost = -1/float(len(qs))
+  fp_cost = 1/float(ntags)
+  fn_cost = float(1)
+  return tp_cost*tp+tn_cost*tn+fp_cost*fp+fn_cost*fn
+  
+def hamming_loss(qs, pc, allc):
+  s = 0
+  for i, q in enumerate(qs):
+     p = pc[i]
+     fp = len(p.difference(q.tag_list))
+     fn = len(q.tag_list.difference(p))
+     s += fp + fn
+  return s/float(len(allc)+len(qs))
+
+def multi_accuracy(qs, pc, allc):
+  s = 0
+  for i, q in enumerate(qs):
+    p = pc[i]
+    tc = q.tag_list
+    s += len(tc.intersection(p))/float(len(tc.union(p)))
+  return s/len(qs)
+
+def multi_precision(qs, pc, allc):
+  s = 0
+  for i, q in enumerate(qs):
+    p = pc[i]
+    tc = q.tag_list
+    s += len(tc.intersection(p))/float(len(p))
+  return s/len(qs)
+
+def multi_recall(qs, pc, allc):
+  s = 0
+  for i, q in enumerate(qs):
+    p = pc[i]
+    tc = q.tag_list
+    s += len(tc.intersection(p))/float(len(tc))
+  return s/len(qs)    
+
+def harmonic_mean(x, y):
+  return 2/(1/float(x)+1/float(y))
+
+def multi_f1(qs, pc, allc):
+  return harmonic_mean(multi_precision(qs, pc, allc), multi_recall(qs, pc, allc))
+
+def eval_multi(questions, tags, cl, folder):
+  fname = folder + '/multi_eval.csv'
+  f = open(fname, 'w')
+  f.write('hamming_loss,precision,recall,f1\n')
+  f.write('{},{},{},{}\n'.format(hamming_loss(questions, cl, tags), \
+          multi_precision(questions, cl, tags),\
+          multi_recall(questions, cl, tags),\
+          multi_f1(questions, cl, tags)))
+  f.close();
+
+
 # assumes only one tag / question
 def eval_tp1(questions, tags, cl, folder):
   confusion = {}
   for i in range(len(questions)):
-    q = questions[i].tag_list[0]
+    q = iter(questions[i].tag_list).next()
     matrix = confusion.setdefault(q, {})
     c = cl[i]
     for pc in c:
@@ -27,11 +84,9 @@ def eval_tp1(questions, tags, cl, folder):
 
   fname = folder + '/eval.csv'
   f = open(fname, 'w')
-  f.write('tag,tp,tn,fp,fn,sensitivity,specificity,specificity,acc,precision,recall,f1\n')
+  f.write('tag,tp,tn,fp,fn,sensitivity,specificity,acc,precision,recall,f1\n')
 
   for true_tag in tags:
-    f.write(true_tag);
-    f.write(',')
     tp = confusion.get(true_tag, 0).get(true_tag, 0)
     predicted_positive = 0;
     for ttag in tags:
@@ -48,8 +103,9 @@ def eval_tp1(questions, tags, cl, folder):
     acc=(tp+tn)/float(len(questions))
     f1=(2*tp)/float(2*tp+fp+fn)
     recall=tp/float(tp+fn)
-    f.write('{},{},{},{},{},{},{},{},{},{},{}\n'.format(tag,tp,tn,fp,fn,sensitivity,specificity,acc,precision,recall,f1))
+    f.write('{},{},{},{},{},{},{},{},{},{},{}\n'.format(true_tag,tp,tn,fp,fn,sensitivity,specificity,acc,precision,recall,f1))
   f.close()
+  eval_multi(questions, tags, cl, folder)
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags):
   def classify(i, eval_question):

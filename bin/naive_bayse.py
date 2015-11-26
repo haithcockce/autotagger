@@ -52,5 +52,5 @@ class NaiveBayseClassifier:
       if loglikelyhood > max_likelyhood:
         max_likelyhood = loglikelyhood
         max_tag = tag
-    return [max_tag]
+    return set([max_tag])
 

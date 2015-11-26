@@ -3,11 +3,14 @@ import csv
 import string
 import copy
 import question
-import naive_bayse
+import naive_bayse as nb
+import sets
+import os
+import eval_classifier as ev
 # comment out if you don't want dependency on joblib
-from joblib import Parallel, delayed
+#from joblib import Parallel, delayed
 
-PROJECT_PATH = '/home/njclimer/source/csc522/'
+PROJECT_PATH = '/home/nclimer/autotagger/'
 kRecordTypeFieldNumber = 1
 kTagsFieldNumber = 16
 kBodyFieldNumber = 8
@@ -15,11 +18,12 @@ kBodyFieldNumber = 8
 kQuestion = '1'
 
 # if set, filters only these tags. Else, uses all tags
-tags_to_consider = ['c++', 'java', 'python', 'c#', 'html', 'javascript']
+tags_to_consider = ['c++', 'java']
 questions=[]
 
 csv_reader = csv.reader(open(PROJECT_PATH + 'data/plain-text/full.csv', 'r'))
 
+all_tags = set()
 # Preprocess data
 for row in csv_reader:
   if (row[kRecordTypeFieldNumber]==kQuestion):
@@ -30,7 +34,7 @@ for row in csv_reader:
       tag_list = [tag for tag in tag_list if tag in tags_to_consider]
     if not tag_list or len(tag_list) == 0:
       continue
-    
+
     bodystr = copy.deepcopy(row[kBodyFieldNumber])
     bodystr = bodystr.lower()
     one_grams = bodystr.split()
@@ -39,29 +43,24 @@ for row in csv_reader:
 
     for one_gram in one_grams:
       word_counts[one_gram] = word_counts.setdefault(one_gram, 0) + 1
+    if len(tag_list) != 1:
+      continue;
 
     questions.append(question.Question(tag_list, word_counts))
 
-nbc = naive_bayse.NaiveBayseClassifier()
-nbc.Train(questions)
-def classify(question):
-  return nbc.Classify(question, False)
-# use this line if you don't want dependency on joblib
-# cls = [classify(question) for question in questions]
-cls = Parallel(n_jobs=8)(delayed(classify)(question) for question in questions)
-tp = {}
-fp = {}
-fn = {}
-for i in range(1, len(cls)):
-  c = cls[i]
-  q = questions[i]
-  if c in q.tag_list:
-    tp[c] = tp.setdefault(c, 0) + 1
-  else:
-    fp[c] = fp.setdefault(c, 0) + 1
-  for t in q.tag_list:
-    if not t == c:
-      fn[t] = fn.setdefault(t, 0) + 1
+questions = questions[:100]
 
-for c in nbc.prob_tag.keys():
-  print "{} tp: {}, fp: {}, fn: {}".format(c, tp.get(c,0), fp.get(c, 0), fn.get(c, 0))
+all_tags = set()
+for q in questions:
+  all_tags.update(q.tag_list)
+
+print all_tags
+try:
+  os.mkdir('./nieve_bayse_eval')
+except:
+  pass
+
+def nieve_bayse_factory():
+  return nb.NaiveBayseClassifier()
+
+ev.leave_one_out(nieve_bayse_factory, ev.eval_tp1, './nieve_bayse_eval', questions, all_tags)

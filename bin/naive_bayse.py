@@ -1,6 +1,5 @@
 import sets
 import math
-from joblib import Parallel, delayed
 
 class NaiveBayseClassifier:
   def Train(self, questions, alpha=1):
@@ -53,5 +52,5 @@ class NaiveBayseClassifier:
       if loglikelyhood > max_likelyhood:
         max_likelyhood = loglikelyhood
         max_tag = tag
-    return max_tag
+    return [max_tag]
 

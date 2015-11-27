@@ -9,6 +9,7 @@ from nltk.corpus import stopwords as sw
 import matplotlib.pyplot as plt
 import sklearn
 from sklearn.preprocessing import normalize
+from sklearn.decomposition import TruncatedSVD
 
 if len(sys.argv) < 2:
     print("Usage: python svd.py <RAW DATA CSV>")
@@ -18,6 +19,7 @@ FILEPATH = sys.argv[1]
 TAGS_INDEX = 0
 BODY_INDEX = 1
 TRANSTABLE = {ord(c): ' ' for c in string.punctuation}
+DOC_COUNT = 0
 
 dictionary = {}
 popular_tags = {}
@@ -151,6 +153,7 @@ for record in records:
     # to the lists
     buff.append(list(monogram_counts.values()))
     tags.append(tag)    # This will be used as the classes
+    DOC_COUNT += 1      # Useful because scipy is largely useless. 
 
     # Sanity check and concatenation. Jesus numpy is slow as shit. 
     if (iterations % 250) == 0:
@@ -185,25 +188,18 @@ print(time.time() - start_time)
 #       This will have n entries of the same document for n tags
 #       that document has. 
 
-# TODO
-# . actually perform SVD
-#     - resulting matrices might be too large :c
+#svd = TruncatedSVD(n_components=10000)
+#svd.fit(sparse_data)
 
-sparse_data_norm = spsparse.csc_matrix(normalize(sparse_data, axis=0))
-
-print('DEBUG: Normalized Matrix')
+print('DEBUG: Trained sklearn\'s SVD on 10000 components')
 print(time.time() - start_time)
 
-# Now to take the normalize the columns since the eigenvalues were so heavily skewed. 
+#sparse_data_norm = spsparse.csc_matrix(normalize(sparse_data, axis=0))
 
-#U, s = spsplinalg.svds(sparse_data, k=len(dictionary), return_singular_vectors="u")
-#_, s, _ = spsplinalg.svds(sparse_data, k=(len(dictionary) - 1), return_singular_vectors="u")
-
-#s = spsplinalg.svds(sparse_data_norm, k=10000, return_singular_vectors=False)
-s = spsplinalg.svds(sparse_data, k=10000, return_singular_vectors=False)
-
-print('DEBUG: Calculated Singular values')
-print(time.time() - start_time)
+#print('DEBUG: Normalized Matrix')
+#print(time.time() - start_time)
+#print('DEBUG: Calculated Singular values')
+#print(time.time() - start_time)
 
 
 

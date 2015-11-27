@@ -2,5 +2,6 @@
 *.swp
 *~
 .gitignore
-#*#
+\#*
 *.pyo
+*.pyc

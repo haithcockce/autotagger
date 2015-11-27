@@ -1,11 +1,45 @@
 import sets
 
-def tag_suggester_cost(tp, tn, fp, fn, qs, tags, ntags):
-  tp_cost = -float(1)
-  tn_cost = -1/float(len(qs))
-  fp_cost = 1/float(ntags)
-  fn_cost = float(1)
-  return tp_cost*tp+tn_cost*tn+fp_cost*fp+fn_cost*fn
+def eval_suggester(questions, tags, cl, folder, ntags):
+  # Compute tag weights.
+  tag_counts = {}
+  for q in questions:
+    for tag in q.tag_list:
+      tag_counts[tag] = tag_counts.get(tag, 0) + 1
+  tag_probs = dict((tag, count/float(len(questions))) for tag, count in tag_counts.iteritems())
+  tp = {}
+  fp = {}
+  tn = {}
+  fn = {}
+  # Compute tp, fn, fp, and fn for each class
+  for i, q in enumerate(questions):
+    c = cl[i]
+    t = q.tag_list
+    for tag in t.intersection(c):
+      tp[tag] = tp.get(tag, 0) + 1
+    for tag in t.difference(c):
+      fn[tag] = fn.get(tag, 0) + 1
+    for tag in c.difference(t):
+      fp[tag] = fp.get(tag, 0) + 1
+    for tag in tags.difference(c.union(t)):
+      tn[tag] = tn.get(tag, 0) + 1
+  fname = folder + '/suggester_eval.csv'
+  f = open(fname, 'w')
+  f.write('tag, tp, tn, fp, fn, probability, cost, subtotal\n')
+  total_cost = 0
+  for tag in tags:
+    p = tag_probs.get(tag, 0)
+    tp_cost = -float(p)
+    fp_cost = -p/float(ntags)
+    tn_cost = 0.0
+    fn_cost = float(p)
+    cost = tp_cost*tp.get(tag, 0) + fp_cost*fp.get(tag, 0) + tn_cost*tn.get(tag, 0) + fn_cost*fn.get(tag, 0)
+    total_cost += cost
+    f.write('{},{},{},{},{},{},{},{}\n'.format(tag,tp.get(tag, 0),tn.get(tag, 0),fp.get(tag, 0),fn.get(tag, 0),p,cost,total_cost))
+  f.close()
+  
+    
+  
 
 def hamming_loss(qs, pc, allc):
   s = 0
@@ -58,7 +92,7 @@ def eval_multi(questions, tags, cl, folder):
 
 
 # assumes only one tag / question
-def eval_tp1(questions, tags, cl, folder):
+def eval_tp1(questions, tags, cl, folder, ntags=10):
   confusion = {}
   for i in range(len(questions)):
     q = iter(questions[i].tag_list).next()
@@ -106,6 +140,7 @@ def eval_tp1(questions, tags, cl, folder):
     f.write('{},{},{},{},{},{},{},{},{},{},{}\n'.format(true_tag,tp,tn,fp,fn,sensitivity,specificity,acc,precision,recall,f1))
   f.close()
   eval_multi(questions, tags, cl, folder)
+  eval_suggester(questions, tags, cl, folder, ntags)
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags):
   def classify(i, eval_question):

@@ -7,6 +7,7 @@ import naive_bayse as nb
 import sets
 import os
 import eval_classifier as ev
+import binary_relevance as br
 # comment out if you don't want dependency on joblib
 #from joblib import Parallel, delayed
 
@@ -43,8 +44,6 @@ for row in csv_reader:
 
     for one_gram in one_grams:
       word_counts[one_gram] = word_counts.setdefault(one_gram, 0) + 1
-    if len(tag_list) != 1:
-      continue;
 
     questions.append(question.Question(tag_list, word_counts))
 
@@ -56,11 +55,14 @@ for q in questions:
 
 print all_tags
 try:
-  os.mkdir('./nieve_bayse_eval')
+  os.mkdir('./nieve_bayse_br_eval')
 except:
   pass
 
 def nieve_bayse_factory():
   return nb.NaiveBayseClassifier()
+def binary_relevance_factory():
+  return br.BinaryRelevanceClassifier(nieve_bayse_factory)
+  
 
-ev.leave_one_out(nieve_bayse_factory, ev.eval_tp1, './nieve_bayse_eval', questions, all_tags)
+ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags)

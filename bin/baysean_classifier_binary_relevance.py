@@ -8,46 +8,17 @@ import sets
 import os
 import eval_classifier as ev
 import binary_relevance as br
+import preprocess_to_questions as pq
 # comment out if you don't want dependency on joblib
 #from joblib import Parallel, delayed
 
 PROJECT_PATH = '/home/nclimer/autotagger/'
-kRecordTypeFieldNumber = 1
-kTagsFieldNumber = 16
-kBodyFieldNumber = 8
+tags_to_consider = ['c++','java']
+questions = pq.read_questions(PROJECT_PATH)
+questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))
+questions = questions[:100]
 
-kQuestion = '1'
-
-# if set, filters only these tags. Else, uses all tags
-tags_to_consider = ['c++', 'java']
-questions=[]
-
-csv_reader = csv.reader(open(PROJECT_PATH + 'data/plain-text/full.csv', 'r'))
-
-all_tags = set()
-# Preprocess data
-for row in csv_reader:
-  if (row[kRecordTypeFieldNumber]==kQuestion):
-    tagstr = copy.deepcopy(row[kTagsFieldNumber])
-    tagstr = tagstr.replace('<', '').replace('>', ' ').lower()
-    tag_list = tagstr.split()
-    if tags_to_consider and len(tags_to_consider) > 0:
-      tag_list = [tag for tag in tag_list if tag in tags_to_consider]
-    if not tag_list or len(tag_list) == 0:
-      continue
-
-    bodystr = copy.deepcopy(row[kBodyFieldNumber])
-    bodystr = bodystr.lower()
-    one_grams = bodystr.split()
-    
-    word_counts = {}
-
-    for one_gram in one_grams:
-      word_counts[one_gram] = word_counts.setdefault(one_gram, 0) + 1
-
-    questions.append(question.Question(tag_list, word_counts))
-
-# questions = questions[:100]
+questions = questions[:100]
 
 all_tags = set()
 for q in questions:

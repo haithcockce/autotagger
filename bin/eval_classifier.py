@@ -152,5 +152,4 @@ class classify:
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):
   cl = Parallel(n_jobs=threads)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
-  print cl
   eval_function(questions, all_tags, cl, folder_name)

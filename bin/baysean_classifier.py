@@ -60,7 +60,8 @@ try:
 except:
   pass
 
-def nieve_bayse_factory():
-  return nb.NaiveBayseClassifier()
+class nieve_bayse_factory:
+  def __call__(self):
+    return nb.NaiveBayseClassifier()
 
-ev.leave_one_out(nieve_bayse_factory, ev.eval_tp1, './nieve_bayse_eval', questions, all_tags)
+ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags)

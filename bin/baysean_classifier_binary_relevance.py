@@ -47,7 +47,7 @@ for row in csv_reader:
 
     questions.append(question.Question(tag_list, word_counts))
 
-questions = questions[:100]
+# questions = questions[:100]
 
 all_tags = set()
 for q in questions:

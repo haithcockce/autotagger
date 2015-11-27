@@ -316,7 +316,7 @@ def train():
 
     #pdb.set_trace()
 
-    svd = TruncatedSVD(n_components=5000)
+    svd = TruncatedSVD(n_components=100)
     decomposed_data = svd.fit_transform(tfidf_normalized_matrix)
 
     # Now to take the normalize the columns since the eigenvalues were so heavily skewed. 

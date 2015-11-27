@@ -6,7 +6,7 @@ def tag_suggester_cost(tp, tn, fp, fn, qs, tags, ntags):
   fp_cost = 1/float(ntags)
   fn_cost = float(1)
   return tp_cost*tp+tn_cost*tn+fp_cost*fp+fn_cost*fn
-  
+
 def hamming_loss(qs, pc, allc):
   s = 0
   for i, q in enumerate(qs):

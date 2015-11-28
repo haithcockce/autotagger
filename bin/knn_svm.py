@@ -1,11 +1,11 @@
-import sys, csv, string, copy, os
+import sys, csv, string, copy, os, time
 import question
 import eval_classifier as ev
 import kNN_SVMcore as core
 
 # For compatibility with the eval module
 questions = None
-
+start_time = time.time()
 
 def setup(args):
     global questions

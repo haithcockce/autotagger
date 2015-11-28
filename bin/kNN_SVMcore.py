@@ -13,6 +13,8 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
+# import eval_classifier as ev                                                    
+
 
 # TODO 
 # http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html
@@ -30,6 +32,7 @@ labels = []
 classifier = None
 svd = None
 cv = None
+tfidf = None
 
 start_time = time.time()
 
@@ -258,8 +261,8 @@ def predict_tag(doc):
 #       OBJECTIVE:  is set to 'train', 'validate', or 'test'
 def setup(args):
 
-    print("DEBUG: Checking input.")
-    print(time.time() - start_time)
+    #print("DEBUG: Checking input.")
+    #print(time.time() - start_time)
 
     check_input(args)
 
@@ -273,20 +276,26 @@ def setup(args):
         global TEST_DATA_FILEPATH
         TEST_DATA_FILEPATH = args[4]
 
-    print("DEBUG: Constructing tags and docs.")
-    print(time.time() - start_time)
+    #print("DEBUG: Constructing tags and docs.")
+    #print(time.time() - start_time)
 
     construct_tags_and_docs()
 
-    print("DEBUG: Constructing popular tags.")
-    print(time.time() - start_time)
+    #print("DEBUG: Constructing popular tags.")
+    #print(time.time() - start_time)
 
     construct_popular_tags()
 
-    print("DEBUG: Assigning popular tags")
-    print(time.time() - start_time)
+    #print("DEBUG: Assigning popular tags")
+    #print(time.time() - start_time)
 
     assign_popular_tags()
+
+    try:
+        os.mkdir('./knn_eval')
+        os.mkdir('./ova_svm_eval')
+    except:
+        pass
 
 
 
@@ -346,20 +355,10 @@ def train():
 
 
 
-def validate():
-    print("METHOD STUB. validate() needs to be implemented.")
-
-def test():
-    print("METHOD STUB. test() needs to be implemented.")
-
-
-
-
-
-setup(sys.argv)
-if OBJECTIVE == 'train':
-    train()
-elif OBJECTIVE == 'validate':
-    validate()
-else:
-    test()
+#setup(sys.argv)
+#if OBJECTIVE == 'train':
+#    train()
+#elif OBJECTIVE == 'validate':
+#    validate()
+#else:
+#    test()

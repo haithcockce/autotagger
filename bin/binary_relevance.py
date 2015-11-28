@@ -14,15 +14,14 @@ class BinaryRelevanceClassifier:
       tqs = [None]*len(questions)
       for i, q in enumerate(questions):
           if (tag in q.tag_list):
-              tqs[i] = question.Question([tag], q.word_counts)
+              tqs[i] = question.Question([tag], q.raw_words)
           else:
-              tqs[i] = question.Question([None], q.word_counts)
+              tqs[i] = question.Question([None], q.raw_words)
       classifier = self.classifier_factory()
       classifier.Train(tqs)
       self.classifiers[tag] = classifier
   def Classify(self, question):
     tags = []
     for tag, classifier in self.classifiers.iteritems():
-      if (classifier.Classify(question) != None):
-        tags.append(tag)
-    return set(tags)
+      tags += classifier.Classify(question)
+    return tags

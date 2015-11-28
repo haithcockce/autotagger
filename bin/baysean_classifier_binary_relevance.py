@@ -16,9 +16,7 @@ PROJECT_PATH = '/home/nclimer/autotagger/'
 tags_to_consider = ['c++','java']
 questions = pq.read_questions(PROJECT_PATH)
 questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))
-questions = questions[:100]
-
-questions = questions[:100]
+questions = questions[:500]
 
 all_tags = set()
 for q in questions:
@@ -31,9 +29,9 @@ except:
   pass
 
 def nieve_bayse_factory():
-  return nb.NaiveBayseClassifier()
+  return nb.NaiveBayseClassifier(mle=False)
 def binary_relevance_factory():
   return br.BinaryRelevanceClassifier(nieve_bayse_factory)
   
 
-ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags, threads=1)
+ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags, threads=2)

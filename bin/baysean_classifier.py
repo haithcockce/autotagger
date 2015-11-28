@@ -16,7 +16,7 @@ tags_to_consider = ['c++', 'java']
 
 questions = pq.read_questions(PROJECT_PATH)
 questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))
-questions = questions[:100]
+questions = questions[:500]
 all_tags = set()
 for q in questions:
   all_tags.update(q.tag_list)
@@ -29,6 +29,6 @@ except:
 
 class nieve_bayse_factory:
   def __call__(self):
-    return nb.NaiveBayseClassifier()
+    return nb.NaiveBayseClassifier(5)
 
 ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags)

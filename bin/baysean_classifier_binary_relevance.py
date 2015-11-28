@@ -36,4 +36,4 @@ def binary_relevance_factory():
   return br.BinaryRelevanceClassifier(nieve_bayse_factory)
   
 
-ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags)
+ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags, threads=1)

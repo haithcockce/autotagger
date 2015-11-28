@@ -23,6 +23,5 @@ class BinaryRelevanceClassifier:
   def Classify(self, question):
     tags = []
     for tag, classifier in self.classifiers.iteritems():
-      if (classifier.Classify(question) != None):
-        tags.append(tag)
-    return set(tags)
+      tags += classifier.Classify(question)
+    return tags

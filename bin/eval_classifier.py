@@ -1,5 +1,6 @@
 import sets
 from joblib import Parallel, delayed
+import numpy
 
 def eval_suggester(questions, tags, cl, folder, ntags):
   # Compute tag weights.
@@ -7,14 +8,14 @@ def eval_suggester(questions, tags, cl, folder, ntags):
   for q in questions:
     for tag in q.tag_list:
       tag_counts[tag] = tag_counts.get(tag, 0) + 1
-  tag_probs = dict((tag, count/float(len(questions))) for tag, count in tag_counts.iteritems())
+  tag_probs = dict((tag, count/numpy.float64(len(questions))) for tag, count in tag_counts.iteritems())
   tp = {}
   fp = {}
   tn = {}
   fn = {}
   # Compute tp, fn, fp, and fn for each class
   for i, q in enumerate(questions):
-    c = cl[i]
+    c = set(cl[i])
     t = q.tag_list
     for tag in t.intersection(c):
       tp[tag] = tp.get(tag, 0) + 1
@@ -30,10 +31,10 @@ def eval_suggester(questions, tags, cl, folder, ntags):
   total_cost = 0
   for tag in tags:
     p = tag_probs.get(tag, 0)
-    tp_cost = -float(p)
-    fp_cost = -p/float(ntags)
+    tp_cost = -numpy.float64(p)
+    fp_cost = -p/numpy.float64(ntags)
     tn_cost = 0.0
-    fn_cost = float(p)
+    fn_cost = numpy.float64(p)
     cost = tp_cost*tp.get(tag, 0) + fp_cost*fp.get(tag, 0) + tn_cost*tn.get(tag, 0) + fn_cost*fn.get(tag, 0)
     total_cost += cost
     f.write('{},{},{},{},{},{},{},{}\n'.format(tag,tp.get(tag, 0),tn.get(tag, 0),fp.get(tag, 0),fn.get(tag, 0),p,cost,total_cost))
@@ -45,18 +46,18 @@ def eval_suggester(questions, tags, cl, folder, ntags):
 def hamming_loss(qs, pc, allc):
   s = 0
   for i, q in enumerate(qs):
-     p = pc[i]
+     p = set(pc[i])
      fp = len(p.difference(q.tag_list))
      fn = len(q.tag_list.difference(p))
      s += fp + fn
-  return s/float(len(allc)+len(qs))
+  return s/numpy.float64(len(allc)+len(qs))
 
 def multi_accuracy(qs, pc, allc):
   s = 0
   for i, q in enumerate(qs):
     p = pc[i]
     tc = q.tag_list
-    s += len(tc.intersection(p))/float(len(tc.union(p)))
+    s += len(tc.intersection(p))/numpy.float64(len(tc.union(p)))
   return s/len(qs)
 
 def multi_precision(qs, pc, allc):
@@ -64,7 +65,7 @@ def multi_precision(qs, pc, allc):
   for i, q in enumerate(qs):
     p = pc[i]
     tc = q.tag_list
-    s += len(tc.intersection(p))/float(len(p))
+    s += len(tc.intersection(p))/numpy.float64(len(p))
   return s/len(qs)
 
 def multi_recall(qs, pc, allc):
@@ -72,11 +73,11 @@ def multi_recall(qs, pc, allc):
   for i, q in enumerate(qs):
     p = pc[i]
     tc = q.tag_list
-    s += len(tc.intersection(p))/float(len(tc))
+    s += len(tc.intersection(p))/numpy.float64(len(tc))
   return s/len(qs)    
 
 def harmonic_mean(x, y):
-  return 2/(1/float(x)+1/float(y))
+  return 2/(1/numpy.float64(x)+1/numpy.float64(y))
 
 def multi_f1(qs, pc, allc):
   return harmonic_mean(multi_precision(qs, pc, allc), multi_recall(qs, pc, allc))
@@ -98,9 +99,8 @@ def eval_tp1(questions, tags, cl, folder, ntags=10):
   for i in range(len(questions)):
     q = iter(questions[i].tag_list).next()
     matrix = confusion.setdefault(q, {})
-    c = cl[i]
-    for pc in c:
-      matrix[pc] = matrix.get(pc, 0) + 1
+    c = iter(cl[i]).next()
+    matrix[c] = matrix.get(c, 0) + 1
 
   fname = folder + '/confusion_matrix.csv'
   f = open(fname, 'w')
@@ -132,12 +132,12 @@ def eval_tp1(questions, tags, cl, folder, ntags=10):
        positive += confusion.get(true_tag, {}).get(ptag, 0)
     fn = positive - tp
     tn = len(questions) - positive - predicted_positive + tp
-    sensitivity = tp/float(tp+fn)
-    specificity = tn/float(fp+tn)
-    precision = tp/float(tp+fp)
-    acc=(tp+tn)/float(len(questions))
-    f1=(2*tp)/float(2*tp+fp+fn)
-    recall=tp/float(tp+fn)
+    sensitivity = tp/numpy.float64(tp+fn)
+    specificity = tn/numpy.float64(fp+tn)
+    precision = tp/numpy.float64(tp+fp)
+    acc=(tp+tn)/numpy.float64(len(questions))
+    f1=(2*tp)/numpy.float64(2*tp+fp+fn)
+    recall=tp/numpy.float64(tp+fn)
     f.write('{},{},{},{},{},{},{},{},{},{},{}\n'.format(true_tag,tp,tn,fp,fn,sensitivity,specificity,acc,precision,recall,f1))
   f.close()
   eval_multi(questions, tags, cl, folder)
@@ -151,5 +151,9 @@ class classify:
       return classifier.Classify(eval_question) 
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):
-  cl = Parallel(n_jobs=threads)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
+  if threads > 1:
+    cl = Parallel(n_jobs=threads)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
+  else:
+    cl = [classify()(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions)]
+  # print cl
   eval_function(questions, all_tags, cl, folder_name)

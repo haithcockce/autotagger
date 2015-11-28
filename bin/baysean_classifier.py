@@ -16,7 +16,7 @@ tags_to_consider = ['c++', 'java']
 
 questions = pq.read_questions(PROJECT_PATH)
 questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))
-questions = questions[:500]
+questions = questions[:100]
 all_tags = set()
 for q in questions:
   all_tags.update(q.tag_list)

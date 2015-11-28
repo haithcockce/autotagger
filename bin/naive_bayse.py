@@ -1,7 +1,7 @@
 import sets
 import math
 import heapq
-
+import preprocess_to_questions as pq
 class NaiveBayseClassifier:
   def __init__(self, clcount=1, alpha=1,  mle=False):
     self.alpha = alpha
@@ -23,7 +23,7 @@ class NaiveBayseClassifier:
       
       word_counts = [self.word_counts_per_tags.setdefault(tag, {}) for tag in question.tag_list]
       
-      for word, count in question.word_counts.iteritems():
+      for word, count in pq.vectorize_body(question.raw_words).iteritems():
         self.allwords.add(word)
         for tag in question.tag_list:
           self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
@@ -48,7 +48,7 @@ class NaiveBayseClassifier:
     for tag, prob_word_given_tag in self.prob_word_given_tag.iteritems():
       uknown_prob = self.unknown_word_prob_tag.get(tag, self.uknown_uknown)
       loglikelyhood = 0
-      for word, count in question.word_counts.iteritems():
+      for word, count in pq.vectorize_body(question.raw_words).iteritems():
         if word in self.allwords:
           # log(x*y) = log(x) + log(y)
           loglikelyhood += count*prob_word_given_tag.get(word, uknown_prob)

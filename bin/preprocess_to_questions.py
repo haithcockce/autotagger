@@ -25,19 +25,20 @@ def read_questions(PROJECT_PATH):
   
       bodystr = copy.deepcopy(row[kBodyFieldNumber])
       bodystr = bodystr.lower()
-      one_grams = bodystr.split()
-      
-      word_counts = {}
-  
-      for one_gram in one_grams:
-        word_counts[one_gram] = word_counts.setdefault(one_gram, 0) + 1
-  
-      questions.append(question.Question(tag_list, word_counts))
+      questions.append(question.Question(tag_list, bodystr))
   return questions
+
+def vectorize_body(bodystr):
+  one_grams = bodystr.split()
+      
+  word_counts = {}
+  for one_gram in one_grams:
+    word_counts[one_gram] = word_counts.setdefault(one_gram, 0) + 1
+  return word_counts
 
 def filter_tags(questions, tags):
   tag_set = set(tags)
-  return [question.Question(tag_set.intersection(q.tag_list), q.word_counts) for q in questions]
+  return [question.Question(tag_set.intersection(q.tag_list), q.raw_words) for q in questions]
 
 def tp1_filter(questions):
   return [q for q in questions if len(q.tag_list) == 1]

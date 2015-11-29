@@ -158,6 +158,7 @@ class classify:
       return cl
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):
+  print 'leave one out {}.'.format(threads)
   if threads > 1:
     cl = Parallel(n_jobs=threads,verbose=10)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
   else:

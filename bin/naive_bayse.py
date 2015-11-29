@@ -4,6 +4,8 @@ import heapq
 import preprocess_to_questions as pq
 from nltk.corpus import stopwords as sw
 
+stopwords = set(sw.words('english'))
+
 class NaiveBayseClassifier:
   def __init__(self, clcount=1, alpha=1,  mle=False, word_frequency=True):
     self.alpha = alpha
@@ -25,7 +27,6 @@ class NaiveBayseClassifier:
     self.allwords = set()
     # Count all questions per tag.
     for question in questions:
-      stopwords = set(sw.words('english'))
       self.all_questions += 1
       for tag in question.tag_list:
         self.tag_counts[tag] = self.tag_counts.setdefault(tag, 0) + 1
@@ -61,7 +62,6 @@ class NaiveBayseClassifier:
     self.allwords = set()
     # Count all questions per tag.
     for question in questions:
-      stopwords = sw.words('english')
       self.all_questions += 1
       for tag in question.tag_list:
         self.tag_counts[tag] = self.tag_counts.setdefault(tag, 0) + 1

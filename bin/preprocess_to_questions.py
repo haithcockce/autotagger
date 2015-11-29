@@ -25,7 +25,7 @@ def read_questions(PROJECT_PATH):
   
       bodystr = copy.deepcopy(row[kBodyFieldNumber])
       bodystr = bodystr.lower()
-      questions.append(question.Question(tag_list, bodystr))
+      questions.append(question.MakeQuestion(tag_list, bodystr))
   return questions
 
 def vectorize_body(bodystr):
@@ -38,7 +38,7 @@ def vectorize_body(bodystr):
 
 def filter_tags(questions, tags):
   tag_set = set(tags)
-  return [question.Question(tag_set.intersection(q.tag_list), q.raw_words) for q in questions]
+  return [question.MakeQuestion(tag_set.intersection(q.tag_list), q.raw_words) for q in questions]
 
 def tp1_filter(questions):
   return [q for q in questions if len(q.tag_list) == 1]

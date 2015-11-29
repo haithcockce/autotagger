@@ -25,20 +25,20 @@ class NaiveBayseClassifier:
     self.allwords = set()
     # Count all questions per tag.
     for question in questions:
-      stopwords = sw.words('english')
+      stopwords = set(sw.words('english'))
       self.all_questions += 1
       for tag in question.tag_list:
         self.tag_counts[tag] = self.tag_counts.setdefault(tag, 0) + 1
       
       word_counts = [self.word_counts_per_tags.setdefault(tag, {}) for tag in question.tag_list]
       
-      for word, count in pq.vectorize_body(question.raw_words).iteritems():
+      for word, count in question.word_counts.iteritems():
         self.allwords.add(word)
         for tag in question.tag_list:
           self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
           
         for w in word_counts:
-          if w not in stopwords:
+          if word not in stopwords:
             w[word] = w.get(word, 0) + count
         
     # Convert to log probabilities
@@ -68,7 +68,7 @@ class NaiveBayseClassifier:
       
       word_counts = [self.word_counts_per_tags.setdefault(tag, {}) for tag in question.tag_list]
       
-      for word, count in pq.vectorize_body(question.raw_words).iteritems():
+      for word, count in question.word_counts.iteritems():
         self.allwords.add(word)
         for tag in question.tag_list:
           self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
@@ -95,7 +95,7 @@ class NaiveBayseClassifier:
     for tag, prob_word_given_tag in self.prob_word_given_tag.iteritems():
       uknown_prob = self.unknown_word_prob_tag.get(tag, self.uknown_uknown)
       loglikelyhood = 0
-      for word, count in pq.vectorize_body(question.raw_words).iteritems():
+      for word, count in question.word_counts.iteritems():
         if word in self.allwords:
           # log(x*y) = log(x) + log(y)
           loglikelyhood += count*prob_word_given_tag.get(word, uknown_prob)

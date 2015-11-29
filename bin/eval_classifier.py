@@ -1,6 +1,7 @@
 import sets
 from joblib import Parallel, delayed
 import numpy
+import time
 
 def eval_suggester(questions, tags, cl, folder, ntags):
   # Compute tag weights.
@@ -148,8 +149,13 @@ class classify:
     def __call__(self, i, eval_question, questions, classifier_factory):
       training_questions = questions[:i]+questions[i+1:]
       classifier = classifier_factory()
+      # t1 = time.time()
       classifier.Train(training_questions);
-      return classifier.Classify(eval_question) 
+      # t2 = time.time()
+      cl = classifier.Classify(eval_question) 
+      # t3 = time.time()
+      print '{} s, {} s'.format(t2-t1,t3-t2)
+      return cl
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):
   if threads > 1:

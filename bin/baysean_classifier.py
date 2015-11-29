@@ -16,6 +16,7 @@ tags_to_consider = ['c++', 'sql', 'angularjs']
 
 questions = pq.read_questions(PROJECT_PATH)
 questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))
+
 print 'Evaulationg {} questions'.format(len(questions))
 all_tags = set()
 for q in questions:
@@ -31,4 +32,4 @@ class nieve_bayse_factory:
   def __call__(self):
     return nb.NaiveBayseClassifier(1)
 
-ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags, threads=8)
+ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags, threads=1)

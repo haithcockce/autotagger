@@ -40,7 +40,9 @@ def setup(args):
         pass
 
 
-    truncated_popular_tags = ['java','python', 'mysql']
+    #truncated_popular_tags = ['java','python', 'mysql']
+    truncated_popular_tags = ['c++', 'angularjs', 'mysql']
+
     for i in range(len(core.tags)):
         if core.popular_tags[core.tags[i]] in truncated_popular_tags:
             questions.append(question.Question([core.popular_tags[core.tags[i]]], core.documents[i]))

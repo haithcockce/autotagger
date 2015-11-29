@@ -8,6 +8,7 @@ def eval_suggester(questions, tags, cl, folder, ntags):
   for q in questions:
     for tag in q.tag_list:
       tag_counts[tag] = tag_counts.get(tag, 0) + 1
+  
   tag_probs = dict((tag, count/numpy.float64(len(questions))) for tag, count in tag_counts.iteritems())
   tp = {}
   fp = {}

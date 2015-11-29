@@ -2,13 +2,21 @@ import sets
 import math
 import heapq
 import preprocess_to_questions as pq
+from nltk.corpus import stopwords as sw
+
 class NaiveBayseClassifier:
-  def __init__(self, clcount=1, alpha=1,  mle=False):
+  def __init__(self, clcount=1, alpha=1,  mle=False, word_frequency=True):
     self.alpha = alpha
     self.clcount = clcount
     self.mle = mle
-    
+    self.word_freq = word_frequency
   def Train(self, questions):
+    if self.word_freq:
+      self.TrainWordFreq(questions)
+    else:
+      self.TrainDocPresense(questions)
+
+  def TrainWordFreq(self, questions):
     self.tag_counts = {}
     self.word_counts_per_tags = {}
     self.words_per_tag = {}
@@ -17,6 +25,7 @@ class NaiveBayseClassifier:
     self.allwords = set()
     # Count all questions per tag.
     for question in questions:
+      stopwords = sw.words('english')
       self.all_questions += 1
       for tag in question.tag_list:
         self.tag_counts[tag] = self.tag_counts.setdefault(tag, 0) + 1
@@ -29,7 +38,8 @@ class NaiveBayseClassifier:
           self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
           
         for w in word_counts:
-          w[word] = w.get(word, 0) + count
+          if w not in stopwords:
+            w[word] = w.get(word, 0) + count
         
     # Convert to log probabilities
     self.log_all_questions = math.log(self.all_questions)
@@ -40,6 +50,43 @@ class NaiveBayseClassifier:
     self.unknown_word_prob_tag = dict([(tag, log_alpha - ltwc) for tag, ltwc in log_total_word_counts.iteritems()])
     self.prob_tag = dict([(tag, math.log(tag_count)-self.log_all_questions) for tag, tag_count in self.tag_counts.iteritems()])
     self.prob_word_given_tag = dict([(tag, dict([(word, math.log(cnt+self.alpha) - log_total_word_counts[tag]) for word, cnt in word_counts.iteritems()])) for tag, word_counts in self.word_counts_per_tags.iteritems()])
+
+    
+  def TrainDocPresense(self, questions):
+    self.tag_counts = {}
+    self.word_counts_per_tags = {}
+    self.words_per_tag = {}
+    
+    self.all_questions = 0
+    self.allwords = set()
+    # Count all questions per tag.
+    for question in questions:
+      stopwords = sw.words('english')
+      self.all_questions += 1
+      for tag in question.tag_list:
+        self.tag_counts[tag] = self.tag_counts.setdefault(tag, 0) + 1
+      
+      word_counts = [self.word_counts_per_tags.setdefault(tag, {}) for tag in question.tag_list]
+      
+      for word, count in pq.vectorize_body(question.raw_words).iteritems():
+        self.allwords.add(word)
+        for tag in question.tag_list:
+          self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
+          
+        for w in word_counts:
+          if w not in stopwords and count > 0:
+            w[word] = w.get(word, 0) + 1
+        
+    # Convert to log probabilities
+    self.log_all_questions = math.log(self.all_questions)
+    laplace_log_all_questions = math.log(self.all_questions+self.alpha)
+    log_alpha = math.log(self.alpha)
+    self.uknown_uknown = log_alpha - laplace_log_all_questions
+
+    self.unknown_word_prob_tag = dict([(tag, log_alpha - self.log_all_questions) for tag in self.words_per_tag.keys()])
+    self.prob_tag = dict([(tag, math.log(tag_count)-self.log_all_questions) for tag, tag_count in self.tag_counts.iteritems()])
+    laplace_doc_count = dict([(tag, math.log(tag_count+self.alpha)) for tag, tag_count in self.tag_counts.iteritems()])
+    self.prob_word_given_tag = dict([(tag, dict([(word, math.log(cnt+self.alpha) - laplace_doc_count[tag]) for word, cnt in word_counts.iteritems()])) for tag, word_counts in self.word_counts_per_tags.iteritems()])
 
   def Classify(self, question):
     log_all_questions = math.log(self.all_questions)

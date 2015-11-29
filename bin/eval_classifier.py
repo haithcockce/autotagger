@@ -149,17 +149,17 @@ class classify:
     def __call__(self, i, eval_question, questions, classifier_factory):
       training_questions = questions[:i]+questions[i+1:]
       classifier = classifier_factory()
-      # t1 = time.time()
+      t1 = time.time()
       classifier.Train(training_questions);
-      # t2 = time.time()
+      t2 = time.time()
       cl = classifier.Classify(eval_question) 
-      # t3 = time.time()
-      print '{} s, {} s'.format(t2-t1,t3-t2)
+      t3 = time.time()
+      # print '{} s, {} s'.format(t2-t1,t3-t2)
       return cl
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):
   if threads > 1:
-    cl = Parallel(n_jobs=threads)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
+    cl = Parallel(n_jobs=threads,verbose=10)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
   else:
     cl = [classify()(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions)]
   # print cl

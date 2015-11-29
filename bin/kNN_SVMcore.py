@@ -47,7 +47,7 @@ TRAINING_DATA_FILEPATH = ''
 TEST_DATA_FILEPATH = ''
 TAGS_INDEX = 0
 BODY_INDEX = 1
-TRANSTABLE = {ord(c): ' ' for c in string.punctuation}
+#TRANSTABLE = {ord(c): ' ' for c in string.punctuation} py2
 
 
 
@@ -107,7 +107,8 @@ def check_input(args):
 def construct_tags_and_docs():
 
     # Construct the records
-    csv_reader = csv.reader(open(TRAINING_DATA_FILEPATH, 'r', newline=''))
+    #csv_reader = csv.reader(open(TRAINING_DATA_FILEPATH, 'r', newline='')) py2
+    csv_reader = csv.reader(open(TRAINING_DATA_FILEPATH, 'r'))
     for row in csv_reader:
 
         # ignore non-questions
@@ -120,7 +121,8 @@ def construct_tags_and_docs():
         
         # Clean the tags and body up before appending
         cleaned_tags_buff = row[16].lower().replace('<', '').replace('>', ' ')
-        cleaned_body_buff = row[8].lower().translate(TRANSTABLE)
+        #cleaned_body_buff = row[8].lower().translate(TRANSTABLE)  py2
+        cleaned_body_buff = row[8].lower().translate(None, string.punctuation)
 
         global tags
         global documents
@@ -308,20 +310,20 @@ def train():
     global labels
     global classifier
 
-    print("DEBUG: Count vectorizing the monograms.")
-    print(time.time() - start_time)
+    #print("DEBUG: Count vectorizing the monograms.") py2
+    #print(time.time() - start_time) py2
 
     cv = CountVectorizer()
     monogram_frequency_matrix = cv.fit_transform(documents)
 
-    print("DEBUG: if-idfing the monograms.")
-    print(time.time() - start_time)
+    #print("DEBUG: if-idfing the monograms.") py2
+    #print(time.time() - start_time) py2
 
     tfidf = TfidfTransformer()
     tfidf_normalized_matrix = tfidf.fit_transform(monogram_frequency_matrix)
 
-    print("DEBUG: SVDing the tfidf-ed monograms.")
-    print(time.time() - start_time)
+    #print("DEBUG: SVDing the tfidf-ed monograms.") py2
+    #print(time.time() - start_time) py2
 
     #pdb.set_trace()
 
@@ -329,8 +331,8 @@ def train():
     decomposed_data = svd.fit_transform(tfidf_normalized_matrix)
 
     # Now to take the normalize the columns since the eigenvalues were so heavily skewed. 
-    print("DEBUG: generated decomposed_data.")
-    print(time.time() - start_time)
+    #print("DEBUG: generated decomposed_data.") py2
+    #print(time.time() - start_time) py2
 
     #global singular_values
     #singular_values = spsparse.linalg.svds(tfidf_normalized_matrix, k=10000, return_singular_vectors=False)

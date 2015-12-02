@@ -10,7 +10,7 @@ import preprocess_to_questions as pq
 # comment out if you don't want dependency on joblib
 #from joblib import Parallel, delayed
 
-PROJECT_PATH = '/home/njclimer/source/csc522/'
+PROJECT_PATH = '/home/nclimer/autotagger/'
 
 tags_to_consider = ['c++', 'sql', 'angularjs']
 
@@ -32,4 +32,4 @@ class nieve_bayse_factory:
   def __call__(self):
     return nb.NaiveBayseClassifier(1)
 
-ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags, threads=1)
+ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags, threads=4)

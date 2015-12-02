@@ -12,11 +12,11 @@ import preprocess_to_questions as pq
 # comment out if you don't want dependency on joblib
 #from joblib import Parallel, delayed
 
-PROJECT_PATH = '/home/njclimer/source/csc522/'
+PROJECT_PATH = '/home/nclimer/autotagger/'
 tags_to_consider = ['c++', 'sql', 'angularjs']
 questions = pq.read_questions(PROJECT_PATH)
-questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))
-# questions = questions[:1000]
+questions = pq.filter_tags(questions, tags_to_consider)
+questions = questions[:500]
 
 all_tags = set()
 for q in questions:
@@ -33,4 +33,4 @@ def nieve_bayse_factory():
 def binary_relevance_factory():
   return br.BinaryRelevanceClassifier(nieve_bayse_factory)
   
-ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags, threads=8)
+ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags, threads=1)

@@ -38,7 +38,8 @@ def vectorize_body(bodystr):
 
 def filter_tags(questions, tags):
   tag_set = set(tags)
-  return [question.MakeQuestion(tag_set.intersection(q.tag_list), q.raw_words) for q in questions]
+  filtered_questions = [question.MakeQuestion(tag_set.intersection(q.tag_list), q.raw_words) for q in questions]
+  return [q for q in filtered_questions if len(q.tag_list) > 0]
 
 def tp1_filter(questions):
   return [q for q in questions if len(q.tag_list) == 1]

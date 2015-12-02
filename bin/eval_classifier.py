@@ -1,4 +1,4 @@
-import sets
+Bimport sets
 from joblib import Parallel, delayed
 import numpy
 import time
@@ -154,7 +154,7 @@ class classify:
       t2 = time.time()
       cl = classifier.Classify(eval_question) 
       t3 = time.time()
-      # print '{} s, {} s'.format(t2-t1,t3-t2)
+      print '{} s, {} s'.format(t2-t1,t3-t2)
       return cl
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):

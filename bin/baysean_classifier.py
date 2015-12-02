@@ -12,7 +12,7 @@ import preprocess_to_questions as pq
 
 PROJECT_PATH = '/home/njclimer/source/csc522/'
 
-tags_to_consider = ['c++', 'sql', 'angularjs']
+tags_to_consider = ['javascript', 'java', 'android', 'php', 'c#', 'python', 'jquery', 'html', 'ios']
 
 questions = pq.read_questions(PROJECT_PATH)
 questions = pq.tp1_filter(pq.filter_tags(questions, tags_to_consider))

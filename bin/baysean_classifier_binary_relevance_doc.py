@@ -16,7 +16,8 @@ PROJECT_PATH = '/home/njclimer/source/csc522/'
 tags_to_consider = ['javascript', 'java', 'android', 'php', 'c#', 'python', 'jquery', 'html', 'ios']
 questions = pq.read_questions(PROJECT_PATH)
 questions = pq.filter_tags(questions, tags_to_consider)
-# questions = questions[:100]
+print 'processing {} questions.'.format(len(questions))
+# questions = questions[:1000]
 
 all_tags = set()
 for q in questions:
@@ -24,13 +25,13 @@ for q in questions:
 
 print all_tags
 try:
-  os.mkdir('./nieve_bayse_br_eval')
+  os.mkdir('./nieve_bayse_br_eval_doc')
 except:
   pass
 
 def nieve_bayse_factory():
-  return nb.NaiveBayseClassifier()
+  return nb.NaiveBayseClassifier(word_frequency=False)
 def binary_relevance_factory():
   return br.BinaryRelevanceClassifier(nieve_bayse_factory)
   
-ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval', questions, all_tags, threads=4)
+ev.leave_one_out(binary_relevance_factory, ev.eval_tp1, './nieve_bayse_br_eval_doc', questions, all_tags, threads=3)

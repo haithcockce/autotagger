@@ -10,7 +10,7 @@ import preprocess_to_questions as pq
 # comment out if you don't want dependency on joblib
 #from joblib import Parallel, delayed
 
-PROJECT_PATH = '/home/nclimer/autotagger/'
+PROJECT_PATH = '/home/njclimer/source/csc522/'
 
 tags_to_consider = ['javascript', 'java', 'android', 'php', 'c#', 'python', 'jquery', 'html', 'ios']
 
@@ -24,12 +24,12 @@ for q in questions:
 
 print all_tags
 try:
-  os.mkdir('./nieve_bayse_eval')
+  os.mkdir('./nieve_bayse_eval_doc')
 except:
   pass
 
 class nieve_bayse_factory:
   def __call__(self):
-    return nb.NaiveBayseClassifier(1)
+    return nb.NaiveBayseClassifier(1, word_frequency=False)
 
-ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval', questions, all_tags, threads=4)
+ev.leave_one_out(nieve_bayse_factory(), ev.eval_tp1, './nieve_bayse_eval_doc', questions, all_tags, threads=1)

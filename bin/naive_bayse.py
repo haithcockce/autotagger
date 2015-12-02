@@ -74,7 +74,7 @@ class NaiveBayseClassifier:
           self.words_per_tag[tag] = self.words_per_tag.get(tag, 0)+count
           
         for w in word_counts:
-          if w not in stopwords and count > 0:
+          if word not in stopwords and count > 0:
             w[word] = w.get(word, 0) + 1
         
     # Convert to log probabilities

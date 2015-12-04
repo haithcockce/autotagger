@@ -1,6 +1,6 @@
-#import sets
 from joblib import Parallel, delayed
 import numpy
+# import time
 
 def eval_suggester(questions, tags, cl, folder, ntags):
   # Compute tag weights.
@@ -8,6 +8,7 @@ def eval_suggester(questions, tags, cl, folder, ntags):
   for q in questions:
     for tag in q.tag_list:
       tag_counts[tag] = tag_counts.get(tag, 0) + 1
+  
   tag_probs = dict((tag, count/numpy.float64(len(questions))) for tag, count in tag_counts.iteritems())
   tp = {}
   fp = {}
@@ -91,16 +92,28 @@ def eval_multi(questions, tags, cl, folder):
           multi_recall(questions, cl, tags),\
           multi_f1(questions, cl, tags)))
   f.close();
-
-
+  fname = folder + '/classifications.csv'
+  f = open(fname, 'w')
+  f.write('id,true_tags,predicted_tags\n')
+  for i, q in enumerate(questions):
+    c = cl[i]
+    f.write('{},'.format(q.number))
+    for tag in q.tag_list:
+      f.write('{};'.format(tag))
+    f.write(',')
+    for tag in c:
+      f.write('{};'.format(tag))
+  f.close()
+    
 # assumes only one tag / question
 def eval_tp1(questions, tags, cl, folder, ntags=10):
   confusion = {}
   for i in range(len(questions)):
     q = iter(questions[i].tag_list).next()
     matrix = confusion.setdefault(q, {})
-    c = iter(cl[i]).next()
-    matrix[c] = matrix.get(c, 0) + 1
+    if len(cl[i]) > 0:
+      c = iter(cl[i]).next()
+      matrix[c] = matrix.get(c, 0) + 1
 
   fname = folder + '/confusion_matrix.csv'
   f = open(fname, 'w')
@@ -147,12 +160,18 @@ class classify:
     def __call__(self, i, eval_question, questions, classifier_factory):
       training_questions = questions[:i]+questions[i+1:]
       classifier = classifier_factory()
+      # t1 = time.time()
       classifier.Train(training_questions);
-      return classifier.Classify(eval_question) 
+      # t2 = time.time()
+      cl = classifier.Classify(eval_question) 
+      # t3 = time.time()
+      # print '{} s, {} s'.format(t2-t1,t3-t2)
+      return cl
 
 def leave_one_out(classifier_factory, eval_function, folder_name, questions, all_tags, threads=2):
+  print 'leave one out {}.'.format(threads)
   if threads > 1:
-    cl = Parallel(n_jobs=threads)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
+    cl = Parallel(n_jobs=threads,verbose=10)(delayed(classify())(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions))
   else:
     cl = [classify()(i, eval_question, questions, classifier_factory) for i, eval_question in enumerate(questions)]
   # print cl
